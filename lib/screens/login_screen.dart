@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_carros/screens/home_screen.dart';
+import 'package:flutter_carros/util/navigator_util.dart';
+import 'package:flutter_carros/widgets/app_button.dart';
+import 'package:flutter_carros/widgets/app_text_field.dart';
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -8,8 +12,13 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
 
-  final usernameRegex = RegExp(r"^([A-z][A-z0-9\.\_]{3,})$", multiLine: true);
-  final passwordRegex =
+  final _usernameTextEditingController = TextEditingController();
+  final _passwordTextEditingController = TextEditingController();
+
+  final _passwordFocusNode = FocusNode();
+
+  final _usernameRegex = RegExp(r"^([A-z][A-z0-9\.\_]{3,})$", multiLine: true);
+  final _passwordRegex =
       RegExp(r"^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$\%\^&])(?=.{6,})");
 
   @override
@@ -30,26 +39,32 @@ class _LoginScreenState extends State<LoginScreen> {
         padding: const EdgeInsets.all(16),
         child: ListView(
           children: <Widget>[
-            _createTextField(
-              context: context,
+            AppTextField(
+              controller: _usernameTextEditingController,
               label: "Usuário",
               hint: "Digite seu usuário",
               keyboardType: TextInputType.emailAddress,
+              onFieldSubmitted: (String text) {
+                FocusScope.of(context).requestFocus(_passwordFocusNode);
+              },
               textCapitalization: TextCapitalization.none,
+              textInputAction: TextInputAction.next,
               validator: _validateUser,
             ),
             SizedBox(height: 8),
-            _createTextField(
-              context: context,
+            AppTextField(
+              controller: _passwordTextEditingController,
+              focusNode: _passwordFocusNode,
               label: "Senha",
               hint: "Digite sua senha",
               textCapitalization: TextCapitalization.none,
               obscureText: true,
+              onFieldSubmitted: (String text) => _onClickLoginButton(),
               validator: _validatePassword,
             ),
             SizedBox(height: 36),
-            _createButton(
-              context: context,
+            AppButton(
+              text: "Login",
               onPressed: _onClickLoginButton,
             ),
           ],
@@ -58,58 +73,11 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  Widget _createTextField(
-      {@required BuildContext context,
-      String label,
-      String hint,
-      bool obscureText = false,
-      TextCapitalization textCapitalization = TextCapitalization.sentences,
-      TextInputType keyboardType = TextInputType.text,
-      FormFieldValidator<String> validator}) {
-    return TextFormField(
-      decoration: InputDecoration(
-        labelText: label,
-        labelStyle: TextStyle(
-          color: Colors.grey,
-          fontSize: 18,
-        ),
-        hintText: hint,
-        hintStyle: TextStyle(
-          fontSize: 18,
-        ),
-        errorMaxLines: 3,
-      ),
-      keyboardType: keyboardType,
-      obscureText: obscureText,
-      style: TextStyle(
-        color: Theme.of(context).primaryColor,
-        fontSize: 18,
-      ),
-      textCapitalization: textCapitalization,
-      validator: validator,
-    );
-  }
-
-  Widget _createButton(
-      {@required BuildContext context, @required VoidCallback onPressed}) {
-    return SizedBox(
-      height: 48,
-      child: RaisedButton(
-        color: Theme.of(context).primaryColor,
-        child: Text(
-          "Login",
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 20,
-          ),
-        ),
-        onPressed: onPressed,
-      ),
-    );
-  }
-
   void _onClickLoginButton() {
-    _formKey.currentState.validate();
+    if (!_formKey.currentState.validate()) {
+      return;
+    }
+    pushScreen(context, HomeScreen());
   }
 
   String _validateUser(String username) {
@@ -117,7 +85,7 @@ class _LoginScreenState extends State<LoginScreen> {
       return "O usuário deve conter no mínimo 4 caracteres.";
     }
 
-    if (!usernameRegex.hasMatch(username)) {
+    if (!_usernameRegex.hasMatch(username)) {
       return "O usuário deve conter somente letras, números, \".\" ou \"_\"";
     }
 
@@ -125,7 +93,7 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   String _validatePassword(String password) {
-    if (!passwordRegex.hasMatch(password)) {
+    if (!_passwordRegex.hasMatch(password)) {
       return "A senha deve possuir ao menos seis caracteres, sendo uma letra maiúscula, uma minúscula, um número e um caractere especial";
     }
 
