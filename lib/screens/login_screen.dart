@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_carros/data/api/login_api.dart';
 import 'package:flutter_carros/screens/home_screen.dart';
 import 'package:flutter_carros/util/navigator_util.dart';
 import 'package:flutter_carros/widgets/app_button.dart';
@@ -73,11 +74,19 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  void _onClickLoginButton() {
+  void _onClickLoginButton() async {
     if (!_formKey.currentState.validate()) {
       return;
     }
-    pushScreen(context, HomeScreen());
+
+    final String username = _usernameTextEditingController.text;
+    final String password = _passwordTextEditingController.text;
+
+    if (await LoginApi.login(username, password)) {
+      pushScreen(context, HomeScreen());
+    } else {
+      print("Deu ruim pra logar");
+    }
   }
 
   String _validateUser(String username) {
