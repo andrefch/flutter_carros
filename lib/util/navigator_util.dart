@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 
-Future<T> pushScreen<T extends Object>(BuildContext context, Widget screen) {
+Future<T> pushScreen<T extends Object>(BuildContext context, Widget screen, {bool replace = false}) {
   final route = MaterialPageRoute<T>(builder: (context) => screen);
-  return Navigator.push(context, route);
+  if (replace) {
+    return Navigator.pushReplacement(context, route);
+  } else {
+    return Navigator.push(context, route);
+  }
 }
 
 bool popScreen<T extends Object>(BuildContext context, [T result]) {
