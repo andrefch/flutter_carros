@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_carros/widgets/drawer_list.dart';
 
 class HomeScreen extends StatelessWidget {
   @override
@@ -8,6 +9,7 @@ class HomeScreen extends StatelessWidget {
         title: Text("Home Page"),
       ),
       body: _createBody(),
+      drawer: DrawerList(),
     );
   }
 
