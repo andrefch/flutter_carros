@@ -18,7 +18,8 @@ class User {
           json["email"],
           json["urlFoto"],
           json["token"],
-          json["roles"]?.map<String>((role) => role.toString())?.toList() ?? List<String>(),
+          json["roles"]?.map<String>((role) => role.toString())?.toList() ??
+              List<String>(),
         );
 
   @override
