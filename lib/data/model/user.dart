@@ -1,3 +1,9 @@
+import 'dart:convert';
+
+import 'package:flutter_carros/util/prefs.dart';
+
+import '../../constants.dart';
+
 class User {
   final int id;
   final String name;
@@ -10,7 +16,7 @@ class User {
   User(this.id, this.name, this.username, this.email, this.imageURL, this.token,
       this.roles);
 
-  User.fromJson(Map<String, dynamic> json)
+  User.fromMap(Map<String, dynamic> json)
       : this(
           json["id"],
           json["nome"],
@@ -18,9 +24,36 @@ class User {
           json["email"],
           json["urlFoto"],
           json["token"],
-          json["roles"]?.map<String>((role) => role.toString())?.toList() ??
-              List<String>(),
+          json["roles"]?.cast<String>() ?? List<String>(),
         );
+
+  Map<String, dynamic> toMap() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['id'] = this.id;
+    data['nome'] = this.name;
+    data['login'] = this.username;
+    data['email'] = this.email;
+    data['urlFoto'] = this.imageURL;
+    data['token'] = this.token;
+    data['roles'] = this.roles;
+    return data;
+  }
+
+  static Future<User> load() async {
+    final value = await Preferences.getString(Constants.KEY_USER, "");
+    if (value.isNotEmpty) {
+      return User.fromMap(json.decode(value));
+    }
+    return null;
+  }
+
+  void save() {
+    Preferences.setString(Constants.KEY_USER, json.encode(toMap()));
+  }
+
+  static void clear() {
+    Preferences.remove(Constants.KEY_USER);
+  }
 
   @override
   String toString() {

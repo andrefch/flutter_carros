@@ -27,6 +27,16 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _showProgress = false;
 
   @override
+  void initState() {
+    super.initState();
+    User.load().then((user) {
+      if (user != null) {
+        _showHomeScreen();
+      }
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -102,11 +112,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
     if (result.success) {
       print(result.data);
-      pushScreen(
-        context,
-        HomeScreen(),
-        replace: true,
-      );
+      _showHomeScreen();
     } else {
       _showMessage(context, result.message);
     }
@@ -150,5 +156,13 @@ class _LoginScreenState extends State<LoginScreen> {
     setState(() {
       this._showProgress = newValue;
     });
+  }
+
+  void _showHomeScreen() {
+    pushScreen(
+      context,
+      HomeScreen(),
+      replace: true,
+    );
   }
 }

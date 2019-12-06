@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_carros/data/model/user.dart';
 import 'package:flutter_carros/screens/login_screen.dart';
 import 'package:flutter_carros/util/navigator_util.dart';
 
@@ -12,15 +13,7 @@ class DrawerList extends StatelessWidget {
       child: Drawer(
         child: ListView(
           children: <Widget>[
-            UserAccountsDrawerHeader(
-              accountName: Text("Cachorrão da Emive"),
-              accountEmail: Text("ocachorraodaemive@emive.com.br"),
-              currentAccountPicture: CircleAvatar(
-                backgroundImage: NetworkImage(
-                  "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQSTY1qd5yRyWPZNcn1EUNglGDd6q0F1AHta4ID0NRBV7Nbp_W6dQ&s"
-                ),
-              ),
-            ),
+            _createHeader(),
             _createItem(
               context: context,
               startIconData: Icons.favorite,
@@ -42,12 +35,28 @@ class DrawerList extends StatelessWidget {
               startIconData: Icons.exit_to_app,
               title: "Sair",
               onTap: () {
+                User.clear();
                 pushScreen(context, LoginScreen(), replace: true);
               },
             ),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _createHeader() {
+    return FutureBuilder(
+      future: User.load(),
+      builder: (BuildContext context, AsyncSnapshot<User> snapshot) {
+        return UserAccountsDrawerHeader(
+          accountName: Text(snapshot.data?.name ?? ""),
+          accountEmail: Text(snapshot.data?.email ?? ""),
+          currentAccountPicture: CircleAvatar(
+            backgroundImage: NetworkImage(snapshot.data?.imageURL),
+          ),
+        );
+      },
     );
   }
 

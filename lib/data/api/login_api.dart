@@ -1,7 +1,9 @@
-import 'dart:convert';
+import 'dart:convert' as converter;
 
+import 'package:flutter_carros/constants.dart';
 import 'package:flutter_carros/data/api/api_result.dart';
 import 'package:flutter_carros/data/model/user.dart';
+import 'package:flutter_carros/util/prefs.dart';
 import 'package:http/http.dart' as http show post;
 
 class LoginApi {
@@ -10,7 +12,7 @@ class LoginApi {
   static Future<ApiResult<User>> login(String username, String password) async {
     final url = "https://carros-springboot.herokuapp.com/api/v2/login";
 
-    final params = json.encode({
+    final params = converter.json.encode({
       "username": username,
       "password": password,
     });
@@ -24,18 +26,24 @@ class LoginApi {
         headers: headers,
       );
 
-      final Map<String, dynamic> responseJson = json.decode(response.body);
+      final Map<String, dynamic> json = converter.json.decode(response.body);
 
       if (response.statusCode == 200) {
-        return ApiResult.success(User.fromJson(responseJson));
+        final user = User.fromMap(json);
+        user.save();
+        
+        return ApiResult.success(user);
       }
 
-      final String message =
-          responseJson["error"] ?? "Failed to login! Generic error!";
+      Preferences.remove(Constants.KEY_USER);
+
+      final String message = json["error"] ?? "Failed to login! Generic error!";
       return ApiResult.failure(message);
     } catch (error, exception) {
       print(error);
       print(exception);
+
+      Preferences.remove(Constants.KEY_USER);
       return ApiResult.failure("Failed to login! Unexpected failure!");
     }
   }

@@ -1,47 +1,68 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_carros/constants.dart';
 import 'package:flutter_carros/data/api/car_api.dart';
+import 'package:flutter_carros/util/prefs.dart';
 import 'package:flutter_carros/widgets/car_listview.dart';
 import 'package:flutter_carros/widgets/drawer_list.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
   _HomeScreenState createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMixin<HomeScreen> {
+class _HomeScreenState extends State<HomeScreen>
+    with SingleTickerProviderStateMixin<HomeScreen> {
+  TabController _tabController;
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeTabController();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return DefaultTabController(
-      length: 3,
-      child: Scaffold(
-        appBar: AppBar(
-          title: Text("Home Page"),
-          bottom: TabBar(
-            tabs: <Widget>[
-              Tab(
-                text: "Clássicos",
-                icon: Icon(Icons.favorite),
-              ),
-              Tab(
-                text: "Esportivos",
-                icon: Icon(Icons.star),
-              ),
-              Tab(
-                text: "Luxo",
-                icon: Icon(Icons.attach_money),
-              ),
-            ],
-          ),
-        ),
-        body: TabBarView(
-          children: <Widget>[
-            CarListView(CarType.classic),
-            CarListView(CarType.sport),
-            CarListView(CarType.lux),
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("Home Page"),
+        bottom: TabBar(
+          controller: _tabController,
+          tabs: <Widget>[
+            Tab(
+              text: "Clássicos",
+              icon: Icon(Icons.favorite),
+            ),
+            Tab(
+              text: "Esportivos",
+              icon: Icon(Icons.star),
+            ),
+            Tab(
+              text: "Luxo",
+              icon: Icon(Icons.attach_money),
+            ),
           ],
         ),
-        drawer: DrawerList(),
       ),
+      body: TabBarView(
+        controller: _tabController,
+        children: <Widget>[
+          CarListView(CarType.classic),
+          CarListView(CarType.sport),
+          CarListView(CarType.lux),
+        ],
+      ),
+      drawer: DrawerList(),
     );
+  }
+
+  void _initializeTabController() async {
+    _tabController = TabController(length: 3, vsync: this);
+    _tabController.addListener(_updateSelectedTab);
+    _tabController.index = await Preferences.getInt(Constants.KEY_SELECTED_TAB);
+  }
+
+  void _updateSelectedTab() {
+    Preferences.setInt(Constants.KEY_SELECTED_TAB, _tabController.index);
   }
 }
