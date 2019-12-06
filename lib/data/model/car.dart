@@ -1,4 +1,4 @@
-import 'dart:ffi';
+
 
 class Car {
   final int id;
@@ -7,8 +7,8 @@ class Car {
   final String description;
   final String urlImage;
   final String urlVideo;
-  final Float latitude;
-  final Float longitude;
+  final String latitude;
+  final String longitude;
 
   Car(
       {this.id,

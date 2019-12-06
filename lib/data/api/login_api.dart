@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter_carros/data/api/api_result.dart';
 import 'package:flutter_carros/data/model/user.dart';
-import 'package:http/http.dart' as http show get, post;
+import 'package:http/http.dart' as http show post;
 
 class LoginApi {
   LoginApi._();

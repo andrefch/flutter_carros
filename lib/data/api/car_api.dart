@@ -1,13 +1,34 @@
+import 'dart:convert' as convert;
+
 import 'package:flutter_carros/data/model/car.dart';
+import 'package:http/http.dart' as http show get;
 
 class CarApi {
   CarApi._();
 
-  static List<Car> getCars() {
-    List<Car> result = List<Car>();
-    result.add(Car(name: "Chevrolet Corvette", urlImage: "http://www.livroandroid.com.br/livro/carros/classicos/Chevrolet_Corvette.png"));
-    result.add(Car(name: "Chevrolet Impala Coupe", urlImage: "http://www.livroandroid.com.br/livro/carros/classicos/Chevrolet_Impala_Coupe.png"));
-    result.add(Car(name: "Cadillac Deville Convertible", urlImage: "http://www.livroandroid.com.br/livro/carros/classicos/Cadillac_Deville_Convertible.png"));
-    return result;
+  static Future<List<Car>> getCars(CarType type) async {
+    final url = "https://carros-springboot.herokuapp.com/api/v1/carros/tipo/${_getCarTypePath(type)}";
+    final response = await http.get(url);
+    final String json = response.body;
+    final List data = convert.json.decode(json);
+
+    return data.map((jsonItem) => Car.fromJson(jsonItem)).toList();
   }
+
+  static String _getCarTypePath(CarType type) {
+    switch (type) {
+      case CarType.classic:
+        return "classicos";
+      case CarType.sport:
+        return "esportivos";
+      case CarType.lux:
+        return "luxo";
+    }
+  }
+}
+
+enum CarType {
+  classic,
+  sport,
+  lux
 }
