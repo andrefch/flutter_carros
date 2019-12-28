@@ -1,6 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_carros/bloc/car_bloc.dart';
 import 'package:flutter_carros/data/api/car_api.dart';
 import 'package:flutter_carros/data/model/car.dart';
+import 'package:flutter_carros/screens/car_detail_screen.dart';
+import 'package:flutter_carros/util/navigator_util.dart';
 
 class CarListView extends StatefulWidget {
   final CarType carType;
@@ -13,31 +18,48 @@ class CarListView extends StatefulWidget {
 
 class _CarListViewState extends State<CarListView>
     with AutomaticKeepAliveClientMixin<CarListView> {
+  final CarBloc _carBloc = CarBloc();
+
+  @override
+  void initState() {
+    super.initState();
+    _carBloc.fetch(widget.carType);
+  }
+
+  @override
+  void dispose() {
+    _carBloc.dispose();
+    super.dispose();
+  }
+
   @override
   bool get wantKeepAlive => true;
 
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    return FutureBuilder(
-      future: CarApi.getCars(this.widget.carType),
+    return StreamBuilder<List<Car>>(
+      stream: _carBloc.stream,
       builder: (context, snapshot) {
-        if (snapshot.hasData) {
-          return _createListView(snapshot.data);
-        } else if (snapshot.hasError) {
-          return Padding(
-            padding: const EdgeInsets.all(16),
-            child: Center(
-              child: Text(
-                "Error: ${snapshot.error}",
-                style: TextStyle(
-                  fontWeight: FontWeight.w600,
-                  color: Colors.red,
-                  fontSize: 20,
-                ),
+        if (snapshot.hasError) {
+          return Center(
+            child: Text(
+              "Failed to load data.\n${snapshot.error}".trim(),
+              style: TextStyle(
+                color: Colors.red,
+                fontSize: 16,
               ),
             ),
           );
+        } else if (snapshot.hasData) {
+          final data = snapshot.data;
+          if (data.isNotEmpty) {
+            return _createListView(data);
+          } else {
+            return Center(
+              child: Text("No data :("),
+            );
+          }
         } else {
           return Center(
             child: CircularProgressIndicator(),
@@ -96,14 +118,15 @@ class _CarListViewState extends State<CarListView>
                       fontSize: 16,
                     ),
                   ),
-                  ButtonTheme.bar(
+                  ButtonBarTheme(
+                    data: ButtonBarTheme.of(context),
                     child: ButtonBar(
                       children: <Widget>[
                         FlatButton(
                           child: Text(
                             "DETALHES",
                           ),
-                          onPressed: () {},
+                          onPressed: () => _onDetailButtonClicked(car),
                         ),
                         FlatButton(
                           child: Text(
@@ -121,5 +144,9 @@ class _CarListViewState extends State<CarListView>
         );
       },
     );
+  }
+
+  void _onDetailButtonClicked(Car car) {
+    pushScreen(context, CarDetailScreen(car));
   }
 }

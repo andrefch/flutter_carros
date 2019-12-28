@@ -1,17 +1,36 @@
 import 'dart:convert' as convert;
 
 import 'package:flutter_carros/data/model/car.dart';
+import 'package:flutter_carros/data/model/user.dart';
 import 'package:http/http.dart' as http show get;
 
 class CarApi {
   CarApi._();
 
   static Future<List<Car>> getCars(CarType type) async {
-    final url = "https://carros-springboot.herokuapp.com/api/v1/carros/tipo/${_getCarTypePath(type)}";
-    final response = await http.get(url);
-    final String json = response.body;
-    final List data = convert.json.decode(json);
+    final url =
+        "https://carros-springboot.herokuapp.com/api/v2/carros/tipo/${_getCarTypePath(type)}";
 
+    final user = await User.load();
+
+    final Map<String, String> headers = {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer ${user.token}",
+    };
+
+//    print("NETWORK: Request ($url)\n$headers");
+
+    final response = await http.get(
+      url,
+      headers: headers,
+    );
+
+    final String json = response.body;
+    final int statusCode = response.statusCode;
+
+//    print("NETWORK: Response ($statusCode) ~> $json");
+
+    final List data = convert.json.decode(json);
     return data.map((jsonItem) => Car.fromJson(jsonItem)).toList();
   }
 
@@ -23,12 +42,10 @@ class CarApi {
         return "esportivos";
       case CarType.lux:
         return "luxo";
+      default:
+        throw Exception("Unexpected car type received: $type");
     }
   }
 }
 
-enum CarType {
-  classic,
-  sport,
-  lux
-}
+enum CarType { classic, sport, lux }

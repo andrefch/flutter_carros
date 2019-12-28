@@ -52,9 +52,11 @@ class DrawerList extends StatelessWidget {
         return UserAccountsDrawerHeader(
           accountName: Text(snapshot.data?.name ?? ""),
           accountEmail: Text(snapshot.data?.email ?? ""),
-          currentAccountPicture: CircleAvatar(
-            backgroundImage: NetworkImage(snapshot.data?.imageURL),
-          ),
+          currentAccountPicture: snapshot.data?.imageURL != null
+              ? CircleAvatar(
+                  backgroundImage: NetworkImage(snapshot.data.imageURL),
+                )
+              : Container(),
         );
       },
     );
