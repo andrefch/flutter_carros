@@ -41,8 +41,16 @@ class _CarListViewState extends State<CarListView>
     return StreamBuilder<List<Car>>(
       stream: _carBloc.stream,
       builder: (context, snapshot) {
-        if (snapshot.hasError) {
+        if (!snapshot.hasError && !snapshot.hasData) {
           return Center(
+            child: CircularProgressIndicator(),
+          );
+        }
+
+        Widget currentWidget;
+
+        if (snapshot.hasError) {
+          currentWidget =  Center(
             child: Text(
               "Failed to load data.\n${snapshot.error}".trim(),
               style: TextStyle(
@@ -54,19 +62,24 @@ class _CarListViewState extends State<CarListView>
         } else if (snapshot.hasData) {
           final data = snapshot.data;
           if (data.isNotEmpty) {
-            return _createListView(data);
+            currentWidget = _createListView(data);
           } else {
-            return Center(
+            currentWidget = Center(
               child: Text("No data :("),
             );
           }
-        } else {
-          return Center(
-            child: CircularProgressIndicator(),
-          );
         }
+
+        return RefreshIndicator(
+          onRefresh: _onRefresh,
+          child: currentWidget,
+        );
       },
     );
+  }
+
+  Future<void> _onRefresh() {
+    return _carBloc.fetch(widget.carType);
   }
 
   ListView _createListView(List<Car> cars) {

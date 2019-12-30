@@ -9,9 +9,10 @@ class CarBloc {
 
   Stream<List<Car>> get stream => _streamController.stream;
 
-  void fetch(CarType type) async {
+  Future<List<Car>> fetch(CarType type) async {
     final List<Car> cars = await CarApi.getCars(type);
     _streamController.add(cars);
+    return Future.value(cars);
   }
 
   void dispose() {
