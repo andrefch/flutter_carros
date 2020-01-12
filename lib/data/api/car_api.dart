@@ -30,6 +30,10 @@ class CarApi {
 
 //    print("NETWORK: Response ($statusCode) ~> $json");
 
+    if (statusCode != 200) {
+      throw Exception("Failed to load cars. ($statusCode)");
+    }
+
     final List data = convert.json.decode(json);
     return data.map((jsonItem) => Car.fromJson(jsonItem)).toList();
   }
