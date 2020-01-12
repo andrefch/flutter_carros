@@ -2,9 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_carros/constants.dart';
 import 'package:flutter_carros/data/api/car_api.dart';
 import 'package:flutter_carros/util/prefs.dart';
-import 'package:flutter_carros/widgets/car_listview.dart';
+import 'package:flutter_carros/widgets/car_page.dart';
 import 'package:flutter_carros/widgets/drawer_list.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -47,9 +46,9 @@ class _HomeScreenState extends State<HomeScreen>
       body: TabBarView(
         controller: _tabController,
         children: <Widget>[
-          CarListView(CarType.classic),
-          CarListView(CarType.sport),
-          CarListView(CarType.lux),
+          CarPage(CarType.classic),
+          CarPage(CarType.sport),
+          CarPage(CarType.lux),
         ],
       ),
       drawer: DrawerList(),
