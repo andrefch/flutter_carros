@@ -1,10 +1,10 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_carros/data/model/car.dart';
 import 'package:flutter_carros/screens/car_detail_screen.dart';
 import 'package:flutter_carros/util/navigator_util.dart';
 
 class CarListView extends StatelessWidget {
-
   final List<Car> cars;
 
   CarListView(this.cars);
@@ -38,7 +38,11 @@ class CarListView extends StatelessWidget {
                       width: 250,
                       height: 105,
                       child: car.urlImage != null
-                          ? Image.network(car.urlImage)
+                          ? CachedNetworkImage(
+                              imageUrl: car.urlImage,
+                              errorWidget: (context, url, error) => Image.asset(
+                                  "assets/images/placeholder_car.png"),
+                            )
                           : Image.asset("assets/images/placeholder_car.png"),
                     ),
                   ),

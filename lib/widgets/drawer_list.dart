@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_carros/data/model/user.dart';
 import 'package:flutter_carros/screens/login_screen.dart';
@@ -53,10 +54,24 @@ class DrawerList extends StatelessWidget {
           accountName: Text(snapshot.data?.name ?? ""),
           accountEmail: Text(snapshot.data?.email ?? ""),
           currentAccountPicture: snapshot.data?.imageURL != null
-              ? CircleAvatar(
-                  backgroundImage: NetworkImage(snapshot.data.imageURL),
+              ? CachedNetworkImage(
+                  imageUrl: snapshot.data?.imageURL ?? "",
+                  imageBuilder: (context, image) => CircleAvatar(
+                    backgroundImage: image,
+                  ),
+                  placeholder: (context, url) => const CircleAvatar(
+                    backgroundImage:
+                        AssetImage('assets/images/placeholder_user.png'),
+                  ),
+                  errorWidget: (context, url, error) => const CircleAvatar(
+                    backgroundImage:
+                        AssetImage('assets/images/placeholder_user.png'),
+                  ),
                 )
-              : Container(),
+              : const CircleAvatar(
+                  backgroundImage:
+                      AssetImage('assets/images/placeholder_user.png'),
+                ),
         );
       },
     );

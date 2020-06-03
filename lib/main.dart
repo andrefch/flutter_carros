@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_carros/screens/login_screen.dart';
+import 'package:flutter_carros/screens/splash_screen.dart';
 
 void main() => runApp(CarApp());
 
@@ -9,9 +9,10 @@ class CarApp extends StatelessWidget {
     return MaterialApp(
       theme: ThemeData(
         primarySwatch: Colors.indigo,
+        visualDensity: VisualDensity.adaptivePlatformDensity,
 //        scaffoldBackgroundColor: Colors.white,
       ),
-      home: LoginScreen(),
+      home: SplashScreen(),
     );
   }
 }

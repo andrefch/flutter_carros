@@ -9,6 +9,6 @@ Future<T> pushScreen<T extends Object>(BuildContext context, Widget screen, {boo
   }
 }
 
-bool popScreen<T extends Object>(BuildContext context, [T result]) {
+void popScreen<T extends Object>(BuildContext context, [T result]) {
   return Navigator.pop(context, result);
 }

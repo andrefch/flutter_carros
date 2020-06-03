@@ -1,7 +1,6 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_carros/bloc/lorem_ipsum_bloc.dart';
-import 'package:flutter_carros/data/api/login_api.dart';
-import 'package:flutter_carros/data/api/lorem_ipsum_api.dart';
 import 'package:flutter_carros/data/model/car.dart';
 import 'package:flutter_carros/util/string_extensions.dart';
 import 'package:flutter_carros/widgets/text.dart';
@@ -16,7 +15,6 @@ class CarDetailScreen extends StatefulWidget {
 }
 
 class _CarDetailScreenState extends State<CarDetailScreen> {
-
   final LoremIpsumBloc _loremIpsumBloc = LoremIpsumBloc();
 
   @override
@@ -87,7 +85,11 @@ class _CarDetailScreenState extends State<CarDetailScreen> {
 
   Widget _createImage() {
     return widget.car.urlImage != null
-        ? Image.network(widget.car.urlImage)
+        ? CachedNetworkImage(
+            imageUrl: widget.car.urlImage,
+            errorWidget: (context, url, error) =>
+                Image.asset("assets/images/placeholder_car.png"),
+          )
         : Image.asset("assets/images/placeholder_car.png");
   }
 
@@ -106,15 +108,15 @@ class _CarDetailScreenState extends State<CarDetailScreen> {
                 overflow: TextOverflow.ellipsis,
                 style: Theme.of(context)
                     .textTheme
-                    .headline
+                    .headline5
                     .copyWith(fontWeight: FontWeight.w500),
               ),
               SizedBox(height: 4.0),
               Text(
-                widget.car.type.capitalize(),
+                widget.car.type.trim().capitalize(),
                 style: Theme.of(context)
                     .textTheme
-                    .subhead
+                    .subtitle1
                     .copyWith(color: Color.fromARGB(255, 117, 117, 117)),
               )
             ],
