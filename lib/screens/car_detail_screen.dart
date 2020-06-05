@@ -99,7 +99,7 @@ class _CarDetailScreenState extends State<CarDetailScreen> {
             progressIndicatorBuilder: (context, url, downloadProgress) {
               return Center(
                 child: CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                  valueColor: AlwaysStoppedAnimation<Color>(Theme.of(context).primaryColor),
                 ),
               );
             },

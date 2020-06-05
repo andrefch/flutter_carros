@@ -127,6 +127,7 @@ class _CarFormScreenState extends State<CarFormScreen> {
           return Center(
             child: CircularProgressIndicator(
               value: downloadProgress.progress,
+              valueColor: AlwaysStoppedAnimation<Color>(Theme.of(context).primaryColor),
             ),
           );
         },

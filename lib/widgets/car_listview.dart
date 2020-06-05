@@ -45,7 +45,7 @@ class CarListView extends StatelessWidget {
                                 return Center(
                                   child: CircularProgressIndicator(
                                     valueColor: AlwaysStoppedAnimation<Color>(
-                                        Colors.white),
+                                        Theme.of(context).primaryColor),
                                   ),
                                 );
                               },
