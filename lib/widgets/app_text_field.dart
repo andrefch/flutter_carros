@@ -6,6 +6,7 @@ class AppTextField extends StatelessWidget {
   final String hint;
   final TextInputType keyboardType;
   final String label;
+  final int maxLines;
   final bool obscureText;
   final ValueChanged<String> onFieldSubmitted;
   final TextCapitalization textCapitalization;
@@ -18,10 +19,11 @@ class AppTextField extends StatelessWidget {
       this.hint,
       this.keyboardType = TextInputType.text,
       this.label,
+      this.maxLines = 1,
       this.obscureText = false,
       this.onFieldSubmitted,
       this.textCapitalization = TextCapitalization.sentences,
-      this.textInputAction = TextInputAction.done,
+      this.textInputAction,
       this.validator});
 
   @override
@@ -46,6 +48,7 @@ class AppTextField extends StatelessWidget {
       ),
       onFieldSubmitted: onFieldSubmitted,
       keyboardType: keyboardType,
+      maxLines: maxLines,
       obscureText: obscureText,
       style: TextStyle(
         color: Theme.of(context).primaryColor,

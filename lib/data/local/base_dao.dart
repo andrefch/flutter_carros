@@ -49,7 +49,7 @@ abstract class BaseDao<T extends Entity> {
     return json.isNotEmpty ? fromMap(json.first) : null;
   }
 
-  Future<bool> exists(int id) async => findById(id) != null;
+  Future<bool> exists(int id) async => await findById(id) != null;
 
   Future<int> count() async {
     final Database db = await database;

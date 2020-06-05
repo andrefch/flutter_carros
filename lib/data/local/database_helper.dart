@@ -30,7 +30,7 @@ class DatabaseHelper {
 
     var database = await openDatabase(
       path,
-      version: 2,
+      version: 1,
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
     );

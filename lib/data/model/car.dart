@@ -1,14 +1,14 @@
 import 'entity.dart';
 
-class Car implements Entity {
-  final int id;
-  final String name;
-  final String type;
-  final String description;
-  final String urlImage;
-  final String urlVideo;
-  final String latitude;
-  final String longitude;
+class Car extends Entity {
+  int id;
+  String name;
+  String type;
+  String description;
+  String urlImage;
+  String urlVideo;
+  String latitude;
+  String longitude;
 
   Car(
       {this.id,

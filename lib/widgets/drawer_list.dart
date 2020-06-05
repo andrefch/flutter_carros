@@ -63,6 +63,11 @@ class DrawerList extends StatelessWidget {
                     backgroundImage:
                         AssetImage('assets/images/placeholder_user.png'),
                   ),
+                  progressIndicatorBuilder: (context, url, downloadProgress) {
+                    return CircularProgressIndicator(
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                    );
+                  },
                   errorWidget: (context, url, error) => const CircleAvatar(
                     backgroundImage:
                         AssetImage('assets/images/placeholder_user.png'),

@@ -40,6 +40,15 @@ class CarListView extends StatelessWidget {
                       child: car.urlImage != null
                           ? CachedNetworkImage(
                               imageUrl: car.urlImage,
+                              progressIndicatorBuilder:
+                                  (context, url, downloadProgress) {
+                                return Center(
+                                  child: CircularProgressIndicator(
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                        Colors.white),
+                                  ),
+                                );
+                              },
                               errorWidget: (context, url, error) => Image.asset(
                                   "assets/images/placeholder_car.png"),
                             )
