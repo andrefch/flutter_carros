@@ -1,8 +1,14 @@
+import 'dart:io';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_carros/data/api/car_api.dart';
 import 'package:flutter_carros/data/model/car.dart';
+import 'package:flutter_carros/util/alert_util.dart';
+import 'package:flutter_carros/util/navigator_util.dart';
 import 'package:flutter_carros/widgets/app_button.dart';
 import 'package:flutter_carros/widgets/app_text_field.dart';
+import 'package:image_picker/image_picker.dart';
 
 class CarFormScreen extends StatefulWidget {
   final Car car;
@@ -21,9 +27,11 @@ class _CarFormScreenState extends State<CarFormScreen> {
   final _nameController = TextEditingController();
   final _descriptionController = TextEditingController();
   final _descriptionFocusNode = FocusNode();
+  final _imagePicker = ImagePicker();
 
   int _index = 0;
   bool _showProgress = false;
+  File _imageFile;
 
   @override
   void initState() {
@@ -115,19 +123,26 @@ class _CarFormScreenState extends State<CarFormScreen> {
   Widget _createHeaderPhoto() {
     final url = car?.urlImage?.trim();
 
-    if ((url == null) || (url.isEmpty)) {
-      return Image.asset(
+    Widget image;
+    if (_imageFile != null) {
+      image = Image.file(
+        _imageFile,
+        height: 150,
+      );
+    } else if ((url == null) || (url.isEmpty)) {
+      image = Image.asset(
         'assets/images/placeholder_camera.png',
         height: 150,
       );
     } else {
-      return CachedNetworkImage(
+      image = CachedNetworkImage(
         imageUrl: url,
         progressIndicatorBuilder: (context, url, downloadProgress) {
           return Center(
             child: CircularProgressIndicator(
               value: downloadProgress.progress,
-              valueColor: AlwaysStoppedAnimation<Color>(Theme.of(context).primaryColor),
+              valueColor:
+                  AlwaysStoppedAnimation<Color>(Theme.of(context).primaryColor),
             ),
           );
         },
@@ -139,6 +154,10 @@ class _CarFormScreenState extends State<CarFormScreen> {
         },
       );
     }
+    return InkWell(
+      onTap: _uploadImage,
+      child: image,
+    );
   }
 
   Widget _createRadioType() {
@@ -224,7 +243,23 @@ class _CarFormScreenState extends State<CarFormScreen> {
     newCar.description = _descriptionController.text.trim();
     newCar.type = _convertIntToCarType(_index);
 
-    await Future.delayed(Duration(seconds: 3));
+    final response = await CarApi.save(newCar, _imageFile);
+    if (response.success) {
+      showAlert(
+        context: context,
+        title: 'Sucesso!',
+        message: 'Carro salvo com sucesso.',
+        callback: () {
+          popScreen(context);
+        },
+      );
+    } else {
+      showAlert(
+        context: context,
+        title: 'Erro!',
+        message: response.message,
+      );
+    }
 
     setState(() {
       _showProgress = false;
@@ -236,5 +271,15 @@ class _CarFormScreenState extends State<CarFormScreen> {
       return 'O nome do carro não foi informado.';
     }
     return null;
+  }
+
+  void _uploadImage() async {
+    final pickedFile = await _imagePicker.getImage(source: ImageSource.gallery);
+    if (pickedFile != null) {
+      final File imageFile = File(pickedFile.path);
+      setState(() {
+        _imageFile = imageFile;
+      });
+    }
   }
 }

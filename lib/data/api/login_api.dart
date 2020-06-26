@@ -3,8 +3,8 @@ import 'dart:convert' as converter;
 import 'package:flutter_carros/constants.dart';
 import 'package:flutter_carros/data/api/api_result.dart';
 import 'package:flutter_carros/data/model/user.dart';
+import 'package:flutter_carros/util/http_helper.dart' as http show post;
 import 'package:flutter_carros/util/prefs.dart';
-import 'package:http/http.dart' as http show post;
 
 class LoginApi {
   LoginApi._();

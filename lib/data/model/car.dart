@@ -1,3 +1,5 @@
+import 'dart:convert' as convert show json;
+
 import 'entity.dart';
 
 class Car extends Entity {
@@ -45,4 +47,6 @@ class Car extends Entity {
     json['longitude'] = this.longitude;
     return json;
   }
+
+  String toJson() => convert.json.encode(toMap());
 }

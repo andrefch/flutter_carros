@@ -1,9 +1,11 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_carros/bloc/lorem_ipsum_bloc.dart';
+import 'package:flutter_carros/data/api/car_api.dart';
 import 'package:flutter_carros/data/model/car.dart';
 import 'package:flutter_carros/screens/car_form_screen.dart';
 import 'package:flutter_carros/service/favorite_service.dart';
+import 'package:flutter_carros/util/alert_util.dart';
 import 'package:flutter_carros/util/navigator_util.dart';
 import 'package:flutter_carros/util/string_extensions.dart';
 import 'package:flutter_carros/widgets/text.dart';
@@ -95,17 +97,20 @@ class _CarDetailScreenState extends State<CarDetailScreen> {
   Widget _createImage() {
     return widget.car.urlImage != null
         ? CachedNetworkImage(
-            imageUrl: widget.car.urlImage,
-            progressIndicatorBuilder: (context, url, downloadProgress) {
-              return Center(
-                child: CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(Theme.of(context).primaryColor),
-                ),
-              );
-            },
-            errorWidget: (context, url, error) =>
-                Image.asset("assets/images/placeholder_car.png"),
-          )
+      imageUrl: widget.car.urlImage,
+      progressIndicatorBuilder: (context, url, downloadProgress) {
+        return Center(
+          child: CircularProgressIndicator(
+            valueColor: AlwaysStoppedAnimation<Color>(
+                Theme
+                    .of(context)
+                    .primaryColor),
+          ),
+        );
+      },
+      errorWidget: (context, url, error) =>
+          Image.asset("assets/images/placeholder_car.png"),
+    )
         : Image.asset("assets/images/placeholder_car.png");
   }
 
@@ -122,7 +127,8 @@ class _CarDetailScreenState extends State<CarDetailScreen> {
                 widget.car.name,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
-                style: Theme.of(context)
+                style: Theme
+                    .of(context)
                     .textTheme
                     .headline5
                     .copyWith(fontWeight: FontWeight.w500),
@@ -130,7 +136,8 @@ class _CarDetailScreenState extends State<CarDetailScreen> {
               SizedBox(height: 4.0),
               Text(
                 widget.car.type.trim().capitalize(),
-                style: Theme.of(context)
+                style: Theme
+                    .of(context)
                     .textTheme
                     .subtitle1
                     .copyWith(color: Color.fromARGB(255, 117, 117, 117)),
@@ -142,13 +149,17 @@ class _CarDetailScreenState extends State<CarDetailScreen> {
           children: <Widget>[
             IconButton(
               icon: Icon(favorite ? Icons.favorite : Icons.favorite_border),
-              color: favorite ? Colors.red : Theme.of(context).primaryColor,
+              color: favorite ? Colors.red : Theme
+                  .of(context)
+                  .primaryColor,
               iconSize: 40,
               onPressed: _onFavoriteButtonClicked,
             ),
             IconButton(
               icon: Icon(Icons.share),
-              color: Theme.of(context).primaryColor,
+              color: Theme
+                  .of(context)
+                  .primaryColor,
               iconSize: 40,
               onPressed: _onShareButtonClicked,
             ),
@@ -239,7 +250,25 @@ class _CarDetailScreenState extends State<CarDetailScreen> {
     pushScreen(context, CarFormScreen(car: widget.car));
   }
 
-  void _onDeleteButtonClicked() {}
+  void _onDeleteButtonClicked() async {
+    final result = await CarApi.delete(widget.car);
+    if (result.success) {
+      showAlert(
+          context: context,
+          title: 'Excluir veículo?',
+          message: 'Veículo excluído com sucesso.',
+          callback: () {
+            popScreen(context);
+          }
+      );
+    } else {
+      showAlert(
+          context: context,
+          title: 'Ops!',
+          message: result.message,
+      );
+    }
+  }
 
   void _onShareButtonClicked() {}
 

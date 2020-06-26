@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_carros/bloc/login_bloc.dart';
 import 'package:flutter_carros/screens/home_screen.dart';
+import 'package:flutter_carros/util/alert_util.dart';
 import 'package:flutter_carros/util/navigator_util.dart';
 import 'package:flutter_carros/widgets/app_button.dart';
 import 'package:flutter_carros/widgets/app_text_field.dart';
@@ -29,7 +30,11 @@ class _LoginScreenState extends State<LoginScreen> {
     super.initState();
     _loginBloc.user.listen(
       (user) => _showHomeScreen(),
-      onError: (error) => _showMessage(context, error.message),
+      onError: (error) => showAlert(
+        context: context,
+        title: 'Ops!',
+        message: error.message,
+      ),
     );
   }
 
@@ -129,23 +134,6 @@ class _LoginScreenState extends State<LoginScreen> {
 //    }
 
     return null;
-  }
-
-  void _showMessage(BuildContext context, String message) {
-    showDialog(
-        context: context,
-        builder: (context) {
-          return AlertDialog(
-            title: Text("Ops!"),
-            content: Text(message),
-            actions: <Widget>[
-              FlatButton(
-                child: Text("OK"),
-                onPressed: () => popScreen(context),
-              )
-            ],
-          );
-        });
   }
 
   void _showHomeScreen() {
