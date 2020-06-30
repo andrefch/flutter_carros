@@ -4,6 +4,7 @@ import 'package:flutter_carros/bloc/lorem_ipsum_bloc.dart';
 import 'package:flutter_carros/data/api/car_api.dart';
 import 'package:flutter_carros/data/model/car.dart';
 import 'package:flutter_carros/screens/car_form_screen.dart';
+import 'package:flutter_carros/screens/video_screen.dart';
 import 'package:flutter_carros/service/favorite_service.dart';
 import 'package:flutter_carros/util/alert_util.dart';
 import 'package:flutter_carros/util/eventbus/event/car_event.dart';
@@ -11,6 +12,8 @@ import 'package:flutter_carros/util/eventbus/event_bus.dart';
 import 'package:flutter_carros/util/navigator_util.dart';
 import 'package:flutter_carros/util/string_extensions.dart';
 import 'package:flutter_carros/widgets/text.dart';
+import 'package:share/share.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class CarDetailScreen extends StatefulWidget {
   final Car car;
@@ -52,9 +55,11 @@ class _CarDetailScreenState extends State<CarDetailScreen> {
             icon: Icon(Icons.place),
             onPressed: _onMapButtonClicked,
           ),
-          IconButton(
-            icon: Icon(Icons.video_library),
-            onPressed: _onVideoButtonClicked,
+          Builder(
+            builder: (BuildContext context) => IconButton(
+              icon: Icon(Icons.video_library),
+              onPressed: () => _onVideoButtonClicked(context),
+            ),
           ),
           PopupMenuButton<_OverflowMenuOption>(
             onSelected: _onOverflowOptionSelected,
@@ -238,7 +243,26 @@ class _CarDetailScreenState extends State<CarDetailScreen> {
 
   void _onMapButtonClicked() {}
 
-  void _onVideoButtonClicked() {}
+  void _onVideoButtonClicked(BuildContext context) async {
+    final Car car = widget.car;
+    final String url = car.urlVideo;
+    if ((url?.isNotEmpty ?? false) && (await canLaunch(url))) {
+//      await launch(url);
+      pushScreen(context, VideoScreen(car: car));
+    } else {
+      final snackBar = SnackBar(
+        content: Text('Não foi possível reproduzir o vídeo.'),
+        action: SnackBarAction(
+          label: 'TENTAR NOVAMENTE',
+          textColor: Theme.of(context).primaryColorLight,
+          onPressed: () {
+            _onVideoButtonClicked(context);
+          },
+        ),
+      );
+      Scaffold.of(context).showSnackBar(snackBar);
+    }
+  }
 
   void _onEditButtonClicked() {
     pushScreen(context, CarFormScreen(car: widget.car));
@@ -267,7 +291,10 @@ class _CarDetailScreenState extends State<CarDetailScreen> {
     }
   }
 
-  void _onShareButtonClicked() {}
+  void _onShareButtonClicked() {
+    final Car car = widget.car;
+    Share.share(car.urlImage, subject: car.name);
+  }
 
   void _onFavoriteButtonClicked() async {
     final bool favorite =
