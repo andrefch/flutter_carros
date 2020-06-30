@@ -6,6 +6,8 @@ import 'package:flutter_carros/data/model/car.dart';
 import 'package:flutter_carros/screens/car_form_screen.dart';
 import 'package:flutter_carros/service/favorite_service.dart';
 import 'package:flutter_carros/util/alert_util.dart';
+import 'package:flutter_carros/util/eventbus/event/car_event.dart';
+import 'package:flutter_carros/util/eventbus/event_bus.dart';
 import 'package:flutter_carros/util/navigator_util.dart';
 import 'package:flutter_carros/util/string_extensions.dart';
 import 'package:flutter_carros/widgets/text.dart';
@@ -97,20 +99,18 @@ class _CarDetailScreenState extends State<CarDetailScreen> {
   Widget _createImage() {
     return widget.car.urlImage != null
         ? CachedNetworkImage(
-      imageUrl: widget.car.urlImage,
-      progressIndicatorBuilder: (context, url, downloadProgress) {
-        return Center(
-          child: CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation<Color>(
-                Theme
-                    .of(context)
-                    .primaryColor),
-          ),
-        );
-      },
-      errorWidget: (context, url, error) =>
-          Image.asset("assets/images/placeholder_car.png"),
-    )
+            imageUrl: widget.car.urlImage,
+            progressIndicatorBuilder: (context, url, downloadProgress) {
+              return Center(
+                child: CircularProgressIndicator(
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                      Theme.of(context).primaryColor),
+                ),
+              );
+            },
+            errorWidget: (context, url, error) =>
+                Image.asset("assets/images/placeholder_car.png"),
+          )
         : Image.asset("assets/images/placeholder_car.png");
   }
 
@@ -127,8 +127,7 @@ class _CarDetailScreenState extends State<CarDetailScreen> {
                 widget.car.name,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
-                style: Theme
-                    .of(context)
+                style: Theme.of(context)
                     .textTheme
                     .headline5
                     .copyWith(fontWeight: FontWeight.w500),
@@ -136,8 +135,7 @@ class _CarDetailScreenState extends State<CarDetailScreen> {
               SizedBox(height: 4.0),
               Text(
                 widget.car.type.trim().capitalize(),
-                style: Theme
-                    .of(context)
+                style: Theme.of(context)
                     .textTheme
                     .subtitle1
                     .copyWith(color: Color.fromARGB(255, 117, 117, 117)),
@@ -149,17 +147,13 @@ class _CarDetailScreenState extends State<CarDetailScreen> {
           children: <Widget>[
             IconButton(
               icon: Icon(favorite ? Icons.favorite : Icons.favorite_border),
-              color: favorite ? Colors.red : Theme
-                  .of(context)
-                  .primaryColor,
+              color: favorite ? Colors.red : Theme.of(context).primaryColor,
               iconSize: 40,
               onPressed: _onFavoriteButtonClicked,
             ),
             IconButton(
               icon: Icon(Icons.share),
-              color: Theme
-                  .of(context)
-                  .primaryColor,
+              color: Theme.of(context).primaryColor,
               iconSize: 40,
               onPressed: _onShareButtonClicked,
             ),
@@ -258,14 +252,17 @@ class _CarDetailScreenState extends State<CarDetailScreen> {
           title: 'Excluir veículo?',
           message: 'Veículo excluído com sucesso.',
           callback: () {
+            EventBus.get(context).sendEvent(CarEvent(
+              action: CarEventAction.DELETED,
+              carType: getCarTypeByValue(widget.car.type),
+            ));
             popScreen(context);
-          }
-      );
+          });
     } else {
       showAlert(
-          context: context,
-          title: 'Ops!',
-          message: result.message,
+        context: context,
+        title: 'Ops!',
+        message: result.message,
       );
     }
   }
@@ -273,7 +270,8 @@ class _CarDetailScreenState extends State<CarDetailScreen> {
   void _onShareButtonClicked() {}
 
   void _onFavoriteButtonClicked() async {
-    final bool favorite = await FavoriteService.toggleFavorite(widget.car);
+    final bool favorite =
+        await FavoriteService.toggleFavorite(context, widget.car);
     setState(() {
       this.favorite = favorite;
     });

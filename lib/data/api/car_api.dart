@@ -118,3 +118,16 @@ class CarApi {
 }
 
 enum CarType { classic, sport, lux }
+
+CarType getCarTypeByValue(String value) {
+  if (value == 'classicos') {
+    return CarType.classic;
+  } else if (value == 'esportivos') {
+    return CarType.sport;
+  } else if (value == 'luxo') {
+    return CarType.lux;
+  } else {
+    throw Exception(
+        'Illegal argument exception! CarType $value does not exists.');
+  }
+}

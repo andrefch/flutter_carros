@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_carros/data/api/car_api.dart';
 import 'package:flutter_carros/data/model/car.dart';
 import 'package:flutter_carros/util/alert_util.dart';
+import 'package:flutter_carros/util/eventbus/event/car_event.dart';
+import 'package:flutter_carros/util/eventbus/event_bus.dart';
 import 'package:flutter_carros/util/navigator_util.dart';
 import 'package:flutter_carros/widgets/app_button.dart';
 import 'package:flutter_carros/widgets/app_text_field.dart';
@@ -250,6 +252,10 @@ class _CarFormScreenState extends State<CarFormScreen> {
         title: 'Sucesso!',
         message: 'Carro salvo com sucesso.',
         callback: () {
+          EventBus.get(context).sendEvent(CarEvent(
+            action: CarEventAction.SAVED,
+            carType: _getCarTypeByIndex(_index),
+          ));
           popScreen(context);
         },
       );
@@ -280,6 +286,17 @@ class _CarFormScreenState extends State<CarFormScreen> {
       setState(() {
         _imageFile = imageFile;
       });
+    }
+  }
+
+  CarType _getCarTypeByIndex(int index) {
+    switch(index) {
+      case 1:
+        return CarType.sport;
+      case 2:
+        return CarType.lux;
+      default:
+        return CarType.classic;
     }
   }
 }

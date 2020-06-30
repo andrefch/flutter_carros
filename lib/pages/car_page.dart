@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_carros/bloc/car_bloc.dart';
 import 'package:flutter_carros/data/api/car_api.dart';
 import 'package:flutter_carros/data/model/car.dart';
+import 'package:flutter_carros/util/eventbus/event/car_event.dart';
+import 'package:flutter_carros/util/eventbus/event_bus.dart';
 import 'package:flutter_carros/widgets/car_listview.dart';
 
 class CarPage extends StatefulWidget {
@@ -19,15 +21,24 @@ class _CarPageState extends State<CarPage>
     with AutomaticKeepAliveClientMixin<CarPage> {
   final CarBloc _carBloc = CarBloc();
 
+  StreamSubscription _eventSubscription;
+
   @override
   void initState() {
     super.initState();
     _carBloc.fetch(widget.carType);
+    _eventSubscription = EventBus.get(context).stream.listen((event) {
+      if ((event is CarEvent) && (event.carType == widget.carType)) {
+        print('Fetching ${event.carType}. Reason: ${event.action}');
+        _carBloc.fetch(widget.carType);
+      }
+    });
   }
 
   @override
   void dispose() {
     _carBloc.dispose();
+    _eventSubscription?.cancel();
     super.dispose();
   }
 
