@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_auth_buttons/flutter_auth_buttons.dart';
 import 'package:flutter_carros/bloc/login_bloc.dart';
 import 'package:flutter_carros/screens/home_screen.dart';
 import 'package:flutter_carros/util/alert_util.dart';
@@ -87,15 +88,23 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
             SizedBox(height: 36),
             StreamBuilder<bool>(
-                stream: _loginBloc.progress,
-                initialData: false,
-                builder: (context, snapshot) {
-                  return AppButton(
-                    text: "Login",
-                    onPressed: () => _onClickLoginButton(context),
-                    showProgress: snapshot.data,
-                  );
-                }),
+              stream: _loginBloc.progress,
+              initialData: false,
+              builder: (context, snapshot) {
+                return AppButton(
+                  text: "Login",
+                  onPressed: () => _onClickLoginButton(context),
+                  showProgress: snapshot.data,
+                );
+              },
+            ),
+            SizedBox(height: 8),
+            SizedBox(
+              height: 48,
+              child: GoogleSignInButton(
+                onPressed: () {},
+              ),
+            ),
           ],
         ),
       ),

@@ -19,6 +19,8 @@ dependencies:
   share: ^0.6.4+3
   url_launcher: ^5.4.11
   video_player: ^0.10.11+1
+  google_maps_flutter: ^0.5.28+1
+  flutter_auth_buttons: ^0.8.0
 
   cupertino_icons: ^0.1.2
 

@@ -4,6 +4,7 @@ import 'package:flutter_carros/bloc/lorem_ipsum_bloc.dart';
 import 'package:flutter_carros/data/api/car_api.dart';
 import 'package:flutter_carros/data/model/car.dart';
 import 'package:flutter_carros/screens/car_form_screen.dart';
+import 'package:flutter_carros/screens/map_screen.dart';
 import 'package:flutter_carros/screens/video_screen.dart';
 import 'package:flutter_carros/service/favorite_service.dart';
 import 'package:flutter_carros/util/alert_util.dart';
@@ -28,11 +29,13 @@ class _CarDetailScreenState extends State<CarDetailScreen> {
   final LoremIpsumBloc _loremIpsumBloc = LoremIpsumBloc();
   bool favorite = false;
 
+  Car get car => widget.car;
+
   @override
   void initState() {
     super.initState();
     _loremIpsumBloc.fetch();
-    FavoriteService.isFavorite(widget.car).then((value) {
+    FavoriteService.isFavorite(car).then((value) {
       setState(() {
         favorite = value;
       });
@@ -49,11 +52,13 @@ class _CarDetailScreenState extends State<CarDetailScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.car.name),
+        title: Text(car.name),
         actions: <Widget>[
-          IconButton(
-            icon: Icon(Icons.place),
-            onPressed: _onMapButtonClicked,
+          Builder(
+            builder: (BuildContext context) => IconButton(
+              icon: Icon(Icons.place),
+              onPressed: () => _onMapButtonClicked(context),
+            ),
           ),
           Builder(
             builder: (BuildContext context) => IconButton(
@@ -102,9 +107,9 @@ class _CarDetailScreenState extends State<CarDetailScreen> {
   }
 
   Widget _createImage() {
-    return widget.car.urlImage != null
+    return car.urlImage != null
         ? CachedNetworkImage(
-            imageUrl: widget.car.urlImage,
+            imageUrl: car.urlImage,
             progressIndicatorBuilder: (context, url, downloadProgress) {
               return Center(
                 child: CircularProgressIndicator(
@@ -129,7 +134,7 @@ class _CarDetailScreenState extends State<CarDetailScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               Text(
-                widget.car.name,
+                car.name,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 style: Theme.of(context)
@@ -139,7 +144,7 @@ class _CarDetailScreenState extends State<CarDetailScreen> {
               ),
               SizedBox(height: 4.0),
               Text(
-                widget.car.type.trim().capitalize(),
+                car.type.trim().capitalize(),
                 style: Theme.of(context)
                     .textTheme
                     .subtitle1
@@ -180,7 +185,7 @@ class _CarDetailScreenState extends State<CarDetailScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         text(
-          widget.car.description,
+          car.description,
           size: 18.0,
           bold: true,
         ),
@@ -241,10 +246,19 @@ class _CarDetailScreenState extends State<CarDetailScreen> {
     }
   }
 
-  void _onMapButtonClicked() {}
+  void _onMapButtonClicked(BuildContext context) {
+    if ((car.latitude == null) || (car.longitude == null)) {
+      final snackBar = SnackBar(
+        content: Text('${car.name} não possui localização definida.'),
+      );
+      Scaffold.of(context).showSnackBar(snackBar);
+      return;
+    }
+
+    pushScreen(context, MapScreen(car: car));
+  }
 
   void _onVideoButtonClicked(BuildContext context) async {
-    final Car car = widget.car;
     final String url = car.urlVideo;
     if ((url?.isNotEmpty ?? false) && (await canLaunch(url))) {
 //      await launch(url);
@@ -265,11 +279,11 @@ class _CarDetailScreenState extends State<CarDetailScreen> {
   }
 
   void _onEditButtonClicked() {
-    pushScreen(context, CarFormScreen(car: widget.car));
+    pushScreen(context, CarFormScreen(car: car));
   }
 
   void _onDeleteButtonClicked() async {
-    final result = await CarApi.delete(widget.car);
+    final result = await CarApi.delete(car);
     if (result.success) {
       showAlert(
           context: context,
@@ -278,7 +292,7 @@ class _CarDetailScreenState extends State<CarDetailScreen> {
           callback: () {
             EventBus.get(context).sendEvent(CarEvent(
               action: CarEventAction.DELETED,
-              carType: getCarTypeByValue(widget.car.type),
+              carType: getCarTypeByValue(car.type),
             ));
             popScreen(context);
           });
@@ -292,13 +306,11 @@ class _CarDetailScreenState extends State<CarDetailScreen> {
   }
 
   void _onShareButtonClicked() {
-    final Car car = widget.car;
     Share.share(car.urlImage, subject: car.name);
   }
 
   void _onFavoriteButtonClicked() async {
-    final bool favorite =
-        await FavoriteService.toggleFavorite(context, widget.car);
+    final bool favorite = await FavoriteService.toggleFavorite(context, car);
     setState(() {
       this.favorite = favorite;
     });
