@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_auth_buttons/flutter_auth_buttons.dart';
 import 'package:flutter_carros/bloc/login_bloc.dart';
 import 'package:flutter_carros/screens/home_screen.dart';
+import 'package:flutter_carros/screens/sign_up_screen.dart';
+import 'package:flutter_carros/service/firebase_service.dart';
 import 'package:flutter_carros/util/alert_util.dart';
 import 'package:flutter_carros/util/navigator_util.dart';
 import 'package:flutter_carros/widgets/app_button.dart';
@@ -102,7 +104,22 @@ class _LoginScreenState extends State<LoginScreen> {
             SizedBox(
               height: 48,
               child: GoogleSignInButton(
-                onPressed: () {},
+                onPressed: () => _onClickLoginGoogleButton(context),
+              ),
+            ),
+            SizedBox(height: 8),
+            SizedBox(
+              height: 48,
+              child: FlatButton(
+                onPressed: () => _onClickSignUpButton(context),
+                child: Text(
+                  'Cadastre-se',
+                  style: TextStyle(
+                    color: Theme.of(context).primaryColor,
+                    fontSize: 18,
+                    decoration: TextDecoration.underline,
+                  ),
+                ),
               ),
             ),
           ],
@@ -122,14 +139,32 @@ class _LoginScreenState extends State<LoginScreen> {
     _loginBloc.login(username, password);
   }
 
+  void _onClickLoginGoogleButton(BuildContext context) async {
+    final service = FirebaseService();
+    final response = await service.loginGoogle();
+
+    if (response.success) {
+      _showHomeScreen();
+    } else {
+      showAlert(
+          context: context,
+          title: "Ops!",
+          message: "Não foi possível realizar o login com o Google.");
+    }
+  }
+
+  void _onClickSignUpButton(BuildContext context) {
+    pushScreen(context, SignUpScreen());
+  }
+
   String _validateUser(String username) {
     if (username.length < 4) {
       return "O usuário deve conter no mínimo 4 caracteres.";
     }
 
-    if (!_usernameRegex.hasMatch(username)) {
-      return "O usuário deve conter somente letras, números, \".\" ou \"_\"";
-    }
+//    if (!_usernameRegex.hasMatch(username)) {
+//      return "O usuário deve conter somente letras, números, \".\" ou \"_\"";
+//    }
 
     return null;
   }

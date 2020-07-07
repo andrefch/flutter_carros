@@ -13,18 +13,24 @@ class User {
   final String token;
   final List<String> roles;
 
-  User(this.id, this.name, this.username, this.email, this.imageURL, this.token,
-      this.roles);
+  User(
+      {this.id,
+      this.name,
+      this.username,
+      this.email,
+      this.imageURL,
+      this.token,
+      this.roles});
 
   User.fromMap(Map<String, dynamic> json)
       : this(
-          json["id"],
-          json["nome"],
-          json["login"],
-          json["email"],
-          json["urlFoto"],
-          json["token"],
-          json["roles"]?.cast<String>() ?? List<String>(),
+          id: json["id"],
+          name: json["nome"],
+          username: json["login"],
+          email: json["email"],
+          imageURL: json["urlFoto"],
+          token: json["token"],
+          roles: json["roles"]?.cast<String>() ?? List<String>(),
         );
 
   Map<String, dynamic> toMap() {

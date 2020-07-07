@@ -75,4 +75,6 @@
 
 # Custom
 /android/app/src/main/res/values/keys.xml
+/android/app/google-services.json
 /ios/Runner/Keys.plist
+/ios/Runner/GoogleService-Info.plist

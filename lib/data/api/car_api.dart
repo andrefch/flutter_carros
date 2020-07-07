@@ -11,7 +11,7 @@ class CarApi {
 
   static Future<List<Car>> getCars(CarType type) async {
     final url =
-        'https://carros-springboot.herokuapp.com/api/v2/carros/tipo/${_getCarTypePath(type)}';
+        'https://carros-springboot.herokuapp.com/api/v1/carros/tipo/${_getCarTypePath(type)}';
 
     final response = await http.get(url);
 
@@ -46,7 +46,7 @@ class CarApi {
     try {
       final String pathCarId = car.id != null ? '/${car.id}' : '';
       final url =
-          'https://carros-springboot.herokuapp.com/api/v2/carros$pathCarId';
+          'https://carros-springboot.herokuapp.com/api/v1/carros$pathCarId';
 
       if (image != null) {
         final imageResponse = await UploadService.upload(image);
@@ -93,7 +93,7 @@ class CarApi {
       }
 
       final url =
-          'https://carros-springboot.herokuapp.com/api/v2/carros/${car.id}';
+          'https://carros-springboot.herokuapp.com/api/v1/carros/${car.id}';
 
       final response = await http.delete(url);
 

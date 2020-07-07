@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_carros/data/model/user.dart';
 import 'package:flutter_carros/screens/login_screen.dart';
+import 'package:flutter_carros/service/firebase_service.dart';
 import 'package:flutter_carros/util/navigator_util.dart';
 
 class DrawerList extends StatelessWidget {
@@ -37,6 +38,7 @@ class DrawerList extends StatelessWidget {
               title: "Sair",
               onTap: () {
                 User.clear();
+                FirebaseService().logout();
                 pushScreen(context, LoginScreen(), replace: true);
               },
             ),
@@ -48,7 +50,7 @@ class DrawerList extends StatelessWidget {
 
   Widget _createHeader() {
     return FutureBuilder(
-      future: User.load(),
+      future: FirebaseService().currentUser(),
       builder: (BuildContext context, AsyncSnapshot<User> snapshot) {
         return UserAccountsDrawerHeader(
           accountName: Text(snapshot.data?.name ?? ""),

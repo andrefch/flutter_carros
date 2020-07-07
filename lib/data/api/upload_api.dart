@@ -9,7 +9,7 @@ class UploadService {
   UploadService._();
 
   static const String URL_UPLOAD =
-      'https://carros-springboot.herokuapp.com/api/v2/upload';
+      'https://carros-springboot.herokuapp.com/api/v1/upload';
 
   static Future<ApiResult<String>> upload(File file) async {
     try {

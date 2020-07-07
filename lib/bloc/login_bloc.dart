@@ -1,8 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter_carros/data/api/api_result.dart';
-import 'package:flutter_carros/data/api/login_api.dart';
 import 'package:flutter_carros/data/model/user.dart';
+import 'package:flutter_carros/service/firebase_service.dart';
 
 class LoginBloc {
 
@@ -24,7 +24,8 @@ class LoginBloc {
   void login(String username, String password) async {
     try {
       _progressStreamController.add(true);
-      final ApiResult<User> apiResult = await LoginApi.login(username, password);
+//      final ApiResult<User> apiResult = await LoginApi.login(username, password);
+      final ApiResult apiResult = await FirebaseService().login(username, password);
       if (apiResult.success) {
         _userStreamController.add(apiResult.data);
       } else {

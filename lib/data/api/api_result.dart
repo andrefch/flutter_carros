@@ -3,7 +3,7 @@ class ApiResult<T> {
   final T data;
   final String message;
 
-  ApiResult.success(T data)
+  ApiResult.success([T data])
       : this.data = data,
         this.message = null,
         this.success = true;
