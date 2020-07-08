@@ -5,7 +5,7 @@ import 'package:flutter_carros/util/prefs.dart';
 import '../../constants.dart';
 
 class User {
-  final int id;
+  final String id;
   final String name;
   final String username;
   final String email;

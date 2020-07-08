@@ -35,7 +35,7 @@ class _CarDetailScreenState extends State<CarDetailScreen> {
   void initState() {
     super.initState();
     _loremIpsumBloc.fetch();
-    FavoriteService.isFavorite(car).then((value) {
+    FavoriteService().isFavorite(car).then((value) {
       setState(() {
         favorite = value;
       });
@@ -310,10 +310,16 @@ class _CarDetailScreenState extends State<CarDetailScreen> {
   }
 
   void _onFavoriteButtonClicked() async {
-    final bool favorite = await FavoriteService.toggleFavorite(context, car);
     setState(() {
-      this.favorite = favorite;
+      this.favorite = !this.favorite;
     });
+
+    final bool favorite = await FavoriteService().toggleFavorite(car);
+    if (this.favorite != favorite) {
+      setState(() {
+        this.favorite = favorite;
+      });
+    }
   }
 }
 

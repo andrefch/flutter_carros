@@ -1,36 +1,53 @@
-import 'package:flutter/cupertino.dart';
-import 'package:flutter_carros/data/local/favorite_dao.dart';
+import 'dart:async';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_carros/data/model/car.dart';
-import 'package:flutter_carros/data/model/favorite.dart';
-import 'package:flutter_carros/model/favorite_model.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_carros/service/firebase_service.dart';
 
 class FavoriteService {
-  static final FavoriteDao _dao = FavoriteDao();
+  static const _COLLECTION_NAME = "favorites";
+  static FavoriteService _instance = FavoriteService._internal();
 
-  static Future<bool> toggleFavorite(BuildContext context, Car car) async {
-    bool result;
-    if (await _dao.exists(car.id)) {
-      await _dao.delete(car.id);
-      result = false;
-    } else {
-      final favorite = Favorite.fromCar(car);
-      await _dao.save(favorite);
-      result = true;
+  FavoriteService._internal();
+
+  factory FavoriteService() => _instance;
+
+  final CollectionReference _collection = FirebaseService()
+      .currentUserDocumentReference
+      .collection(_COLLECTION_NAME);
+
+  Stream<List<Car>> get favoriteCars => _collection
+      .snapshots()
+      .map((snapshot) => snapshot.documents
+          .map((document) => Car.fromMap(document.data))
+          .toList())
+      .asBroadcastStream();
+
+  Future<bool> isFavorite(Car car) async {
+    final document = _collection.document(car.id.toString());
+    return _exists(document);
+  }
+
+  Future<bool> toggleFavorite(Car car) async {
+    final document = _collection.document(car.id.toString());
+    final exists = await _exists(document);
+
+    try {
+      if (exists) {
+        await document.delete();
+        return false;
+      } else {
+        await document.setData(car.toMap());
+        return true;
+      }
+    } catch (e) {
+      print(e);
+      return exists;
     }
-    _updateFavoriteModel(context);
-    return result;
   }
 
-  static Future<List<Car>> getCars() async {
-    return await _dao.findCars();
-  }
-
-  static Future<bool> isFavorite(Car car) async {
-    return await _dao.exists(car.id);
-  }
-
-  static void _updateFavoriteModel(BuildContext context) {
-    Provider.of<FavoriteModel>(context, listen: false).fetchCars();
+  Future<bool> _exists(DocumentReference document) async {
+    final snapshot = await document.get();
+    return snapshot.exists;
   }
 }

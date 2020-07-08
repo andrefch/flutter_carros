@@ -10,7 +10,9 @@ class LoremIpsumBloc {
 
   void fetch() async {
     final lorem = await LoremIpsumApi.getLoremIpsum();
-    _streamController.add(lorem);
+    if (!_streamController.isClosed) {
+      _streamController.add(lorem);
+    }
   }
 
   void dispose() {

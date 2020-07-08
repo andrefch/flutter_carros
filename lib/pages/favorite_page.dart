@@ -1,10 +1,7 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_carros/data/model/car.dart';
-import 'package:flutter_carros/model/favorite_model.dart';
+import 'package:flutter_carros/service/favorite_service.dart';
 import 'package:flutter_carros/widgets/car_listview.dart';
-import 'package:provider/provider.dart';
 
 class FavoritePage extends StatefulWidget {
   @override
@@ -13,11 +10,8 @@ class FavoritePage extends StatefulWidget {
 
 class _FavoritePageState extends State<FavoritePage>
     with AutomaticKeepAliveClientMixin<FavoritePage> {
-  @override
-  void initState() {
-    super.initState();
-    _updateFavoriteModel();
-  }
+
+  final _favoriteService = FavoriteService();
 
   @override
   bool get wantKeepAlive => true;
@@ -25,32 +19,34 @@ class _FavoritePageState extends State<FavoritePage>
   @override
   Widget build(BuildContext context) {
     super.build(context);
-
-    List<Car> data = Provider.of<FavoriteModel>(context).cars;
-    Widget currentWidget;
-    if (data.isNotEmpty) {
-      currentWidget = CarListView(data);
-    } else {
-      currentWidget = Center(
-        child: Text(
-          "No favorites yet :(",
-          style: TextStyle(
-            fontSize: 16,
-          ),
-        ),
-      );
-    }
-    return RefreshIndicator(
-      onRefresh: _onRefresh,
-      child: currentWidget,
+    return StreamBuilder<List<Car>>(
+      stream: _favoriteService.favoriteCars,
+      builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          return Center(
+            child: Text(
+              "Failed to load favorite cars.",
+              style: TextStyle(
+                color: Colors.red,
+                fontSize: 16,
+              ),
+            ),
+          );
+        } else if (snapshot.hasData) {
+          final data = snapshot.data;
+          if (data.isNotEmpty) {
+            return CarListView(data);
+          } else {
+            return Center(
+              child: Text("No favorites yet :("),
+            );
+          }
+        } else {
+          return Center(
+            child: CircularProgressIndicator(),
+          );
+        }
+      },
     );
-  }
-
-  Future<void> _onRefresh() async {
-    return _updateFavoriteModel();
-  }
-
-  void _updateFavoriteModel() {
-    Provider.of<FavoriteModel>(context, listen: false).fetchCars();
   }
 }

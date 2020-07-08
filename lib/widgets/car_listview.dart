@@ -75,7 +75,7 @@ class CarListView extends StatelessWidget {
                       style: TextStyle(fontSize: 22),
                     ),
                     Text(
-                      car.description,
+                      car.description ?? '',
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
