@@ -4,6 +4,7 @@ import 'package:flutter_carros/data/api/car_api.dart';
 import 'package:flutter_carros/pages/car_page.dart';
 import 'package:flutter_carros/pages/favorite_page.dart';
 import 'package:flutter_carros/screens/car_form_screen.dart';
+import 'package:flutter_carros/util/firebase_cloud_messaging.dart';
 import 'package:flutter_carros/util/navigator_util.dart';
 import 'package:flutter_carros/util/prefs.dart';
 import 'package:flutter_carros/widgets/drawer_list.dart';
@@ -21,6 +22,7 @@ class _HomeScreenState extends State<HomeScreen>
   void initState() {
     super.initState();
     _initializeTabController();
+    FirebaseCloudMessaging().initialize();
   }
 
   @override
