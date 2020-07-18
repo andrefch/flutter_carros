@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_auth_buttons/flutter_auth_buttons.dart';
 import 'package:flutter_carros/bloc/login_bloc.dart';
@@ -26,6 +29,10 @@ class _LoginScreenState extends State<LoginScreen> {
   final _passwordRegex =
       RegExp(r"^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$\%\^&])(?=.{6,})");
 
+  String _remoteConfigMessage;
+  final Completer<RemoteConfig> _remoteConfigCompleter = Completer();
+  VoidCallback _remoteConfigListener;
+
   final LoginBloc _loginBloc = LoginBloc();
 
   @override
@@ -39,10 +46,26 @@ class _LoginScreenState extends State<LoginScreen> {
         message: error.message,
       ),
     );
+
+    _remoteConfigCompleter.complete(RemoteConfig.instance);
+    _remoteConfigCompleter.future.then((remoteConfig) {
+      _remoteConfigListener = () {
+        setState(() {
+          _remoteConfigMessage = remoteConfig.getString('message');
+        });
+      };
+      remoteConfig.addListener(_remoteConfigListener);
+      setState(() {
+        _remoteConfigMessage = remoteConfig.getString('message');
+      });
+    });
   }
 
   @override
   void dispose() {
+    _remoteConfigCompleter.future.then((remoteConfig) {
+      remoteConfig.removeListener(_remoteConfigListener);
+    });
     _loginBloc.dispose();
     super.dispose();
   }
@@ -63,63 +86,78 @@ class _LoginScreenState extends State<LoginScreen> {
       key: _formKey,
       child: Container(
         padding: const EdgeInsets.all(16),
-        child: ListView(
+        child: Stack(
           children: <Widget>[
-            AppTextField(
-              controller: _usernameTextEditingController,
-              label: "Usuário",
-              hint: "Digite seu usuário",
-              keyboardType: TextInputType.emailAddress,
-              onFieldSubmitted: (String text) {
-                FocusScope.of(context).requestFocus(_passwordFocusNode);
-              },
-              textCapitalization: TextCapitalization.none,
-              textInputAction: TextInputAction.next,
-              validator: _validateUser,
-            ),
-            SizedBox(height: 8),
-            AppTextField(
-              controller: _passwordTextEditingController,
-              focusNode: _passwordFocusNode,
-              label: "Senha",
-              hint: "Digite sua senha",
-              textCapitalization: TextCapitalization.none,
-              obscureText: true,
-              onFieldSubmitted: (String text) => _onClickLoginButton(context),
-              validator: _validatePassword,
-            ),
-            SizedBox(height: 36),
-            StreamBuilder<bool>(
-              stream: _loginBloc.progress,
-              initialData: false,
-              builder: (context, snapshot) {
-                return AppButton(
-                  text: "Login",
-                  onPressed: () => _onClickLoginButton(context),
-                  showProgress: snapshot.data,
-                );
-              },
-            ),
-            SizedBox(height: 8),
-            SizedBox(
-              height: 48,
-              child: GoogleSignInButton(
-                onPressed: () => _onClickLoginGoogleButton(context),
-              ),
-            ),
-            SizedBox(height: 8),
-            SizedBox(
-              height: 48,
-              child: FlatButton(
-                onPressed: () => _onClickSignUpButton(context),
-                child: Text(
-                  'Cadastre-se',
-                  style: TextStyle(
-                    color: Theme.of(context).primaryColor,
-                    fontSize: 18,
-                    decoration: TextDecoration.underline,
+            ListView(
+              children: <Widget>[
+                AppTextField(
+                  controller: _usernameTextEditingController,
+                  label: "Usuário",
+                  hint: "Digite seu usuário",
+                  keyboardType: TextInputType.emailAddress,
+                  onFieldSubmitted: (String text) {
+                    FocusScope.of(context).requestFocus(_passwordFocusNode);
+                  },
+                  textCapitalization: TextCapitalization.none,
+                  textInputAction: TextInputAction.next,
+                  validator: _validateUser,
+                ),
+                SizedBox(height: 8),
+                AppTextField(
+                  controller: _passwordTextEditingController,
+                  focusNode: _passwordFocusNode,
+                  label: "Senha",
+                  hint: "Digite sua senha",
+                  textCapitalization: TextCapitalization.none,
+                  obscureText: true,
+                  onFieldSubmitted: (String text) =>
+                      _onClickLoginButton(context),
+                  validator: _validatePassword,
+                ),
+                SizedBox(height: 36),
+                StreamBuilder<bool>(
+                  stream: _loginBloc.progress,
+                  initialData: false,
+                  builder: (context, snapshot) {
+                    return AppButton(
+                      text: "Login",
+                      onPressed: () => _onClickLoginButton(context),
+                      showProgress: snapshot.data,
+                    );
+                  },
+                ),
+                SizedBox(height: 8),
+                SizedBox(
+                  height: 48,
+                  child: GoogleSignInButton(
+                    onPressed: () => _onClickLoginGoogleButton(context),
                   ),
                 ),
+                SizedBox(height: 8),
+                SizedBox(
+                  height: 48,
+                  child: FlatButton(
+                    onPressed: () => _onClickSignUpButton(context),
+                    child: Text(
+                      'Cadastre-se',
+                      style: TextStyle(
+                        color: Theme.of(context).primaryColor,
+                        fontSize: 18,
+                        decoration: TextDecoration.underline,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            Align(
+              alignment: Alignment.bottomCenter,
+              child: Text(
+                _remoteConfigMessage ?? '',
+                style: Theme.of(context).textTheme.bodyText2.copyWith(
+                      color: Theme.of(context).primaryColor,
+                      fontWeight: FontWeight.bold,
+                    ),
               ),
             ),
           ],

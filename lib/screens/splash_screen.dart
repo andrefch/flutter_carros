@@ -1,3 +1,4 @@
+import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_carros/data/local/database_helper.dart';
 import 'package:flutter_carros/data/model/user.dart';
@@ -18,8 +19,9 @@ class _SplashScreenState extends State<SplashScreen> {
     final delay = Future.delayed(Duration(seconds: 3));
     final database = DatabaseHelper.getInstance().database;
     final user = User.load();
+    final remoteConfig = _initializeRemoteConfig();
 
-    Future.wait([delay, database, user]).then((value) {
+    Future.wait([delay, database, user, remoteConfig]).then((value) {
       final user = value[2];
       final screen = user != null ? HomeScreen() : LoginScreen();
       _openScreen(screen);
@@ -38,5 +40,25 @@ class _SplashScreenState extends State<SplashScreen> {
 
   void _openScreen(Widget screen) {
     pushScreen(context, screen, replace: true);
+  }
+
+  Future<bool> _initializeRemoteConfig() async {
+    final remoteConfig = await RemoteConfig.instance;
+
+    final defaults = {
+      'message' :  'Default Hello Flutter!'
+    };
+    await remoteConfig.setDefaults(defaults);
+
+    final settings = RemoteConfigSettings(debugMode: true);
+    await remoteConfig.setConfigSettings(settings);
+
+    try {
+      await remoteConfig.fetch(expiration: Duration(minutes: 5));
+      return await remoteConfig.activateFetched();
+    } catch (error) {
+      print('Failed to initialize Remote Config: $error');
+      return false;
+    }
   }
 }
