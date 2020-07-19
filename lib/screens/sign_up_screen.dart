@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_carros/screens/home_screen.dart';
 import 'package:flutter_carros/service/firebase_service.dart';
@@ -5,6 +8,7 @@ import 'package:flutter_carros/util/alert_util.dart';
 import 'package:flutter_carros/util/navigator_util.dart';
 import 'package:flutter_carros/widgets/app_button.dart';
 import 'package:flutter_carros/widgets/app_text_field.dart';
+import 'package:image_picker/image_picker.dart';
 
 class SignUpScreen extends StatefulWidget {
   @override
@@ -22,6 +26,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final _passwordFocusNode = FocusNode();
 
   bool _loading = false;
+  File _selectedFile;
+
+  final ImagePicker _imagePicker = ImagePicker();
 
   @override
   Widget build(BuildContext context) {
@@ -43,6 +50,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
         ),
         child: ListView(
           children: <Widget>[
+            _createHeaderPhoto(context),
+            _createSpace(),
             AppTextField(
               controller: _nameController,
               label: 'Nome',
@@ -102,11 +111,16 @@ class _SignUpScreenState extends State<SignUpScreen> {
     });
 
     try {
+      String imageUrl = 'https://s3-sa-east-1.amazonaws.com/livetouch-temp/livrows/foto.png';
+      if (_selectedFile != null) {
+        imageUrl = await FirebaseService().uploadFile(_selectedFile);
+      }
+
       final result = await FirebaseService().signUp(
         name: _nameController.text,
         username: _usernameController.text,
         password: _passwordController.text,
-        urlPhoto: 'https://s3-sa-east-1.amazonaws.com/livetouch-temp/livrows/foto.png',
+        urlPhoto: imageUrl,
       );
 
       if (result.success) {
@@ -159,5 +173,80 @@ class _SignUpScreenState extends State<SignUpScreen> {
     }
 
     return null;
+  }
+
+  Widget _createHeaderPhoto(BuildContext context) {
+    Widget imageWidget;
+    if (_selectedFile != null) {
+      imageWidget = CircleAvatar(
+        backgroundImage: FileImage(_selectedFile),
+        backgroundColor: Colors.transparent,
+      );
+    } else {
+      imageWidget = Image.asset('assets/images/placeholder_camera.png');
+    }
+
+    return InkWell(
+      onTap: () => _openImagePicker(context),
+      child: Center(
+        child: SizedBox(
+          width: 150,
+          height: 150,
+          child: imageWidget,
+        ),
+      ),
+    );
+  }
+
+  void _openImagePicker(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) {
+        return ListView(
+          shrinkWrap: true,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 8.0),
+              child: Text(
+                'De onde deseja carregar a imagem?',
+                style: Theme.of(context).textTheme.headline6,
+              ),
+            ),
+            ListTile(
+              leading: Icon(
+                Icons.photo_camera,
+                color: Theme.of(context).primaryColor,
+              ),
+              title: Text('Câmera'),
+              onTap: () {
+                popScreen(context);
+                _selectImage(ImageSource.camera);
+              },
+            ),
+            ListTile(
+              leading: Icon(
+                Icons.photo,
+                color: Theme.of(context).primaryColor,
+              ),
+              title: Text('Galeria'),
+              onTap: () {
+                popScreen(context);
+                _selectImage(ImageSource.gallery);
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _selectImage(ImageSource source) async {
+    final pickedFile = await _imagePicker.getImage(source: source);
+    if (pickedFile != null) {
+      final File imageFile = File(pickedFile.path);
+      setState(() {
+        _selectedFile = imageFile;
+      });
+    }
   }
 }

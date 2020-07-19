@@ -1,9 +1,13 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_carros/data/api/api_result.dart';
 import 'package:flutter_carros/data/model/user.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:path/path.dart' as path;
 
 class FirebaseService {
   static const _COLLECTION_NAME = "users";
@@ -135,6 +139,14 @@ class FirebaseService {
       print(e);
       return ApiResult.failure('Não foi possível criar o usuário.');
     }
+  }
+
+  Future<String> uploadFile(File file) async {
+    final String filename = path.basename(file.path);
+    final fileReference = FirebaseStorage.instance.ref().child(filename);
+
+    final snapshot = await fileReference.putFile(file).onComplete;
+    return await snapshot.ref.getDownloadURL();
   }
 
   Future<void> _saveUser(User user) async {
